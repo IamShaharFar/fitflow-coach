@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #2563eb;
+}
+
+html[dir="rtl"] * {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, sans-serif;
+}
+
+a { text-decoration: none; }
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.container-narrow {
+  @apply max-w-5xl mx-auto;
+}

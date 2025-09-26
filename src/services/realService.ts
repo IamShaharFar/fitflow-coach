@@ -1,5 +1,5 @@
 // src/services/realService.ts
-import type { Meal, Workout, Program, User } from "@/types";
+import type { Meal, Workout, Program, User, Sleep, Profile, Goal } from "@/types";
 import type { Api } from "./api.types";
 
 const BASE = import.meta.env.VITE_APP_API_BASE || "http://localhost:4000";
@@ -47,8 +47,6 @@ async function authFetch<T = any>(path: string, init: RequestInit = {}): Promise
   const res = await fetch(`${BASE}${path}`, { ...init, headers });
 
   if (res.status === 401) {
-    // אופציונלי: נקה התחברות מקומית
-    // clearAuth();
     throw new Error("Unauthorized");
   }
 
@@ -75,7 +73,7 @@ export const realApi: Api = {
       body: JSON.stringify({ email, password }),
     });
     setToken(data.token);
-    setUser(data.user); // כבר עם id מנורמל
+    setUser(data.user);
     return data;
   },
 
@@ -105,6 +103,21 @@ export const realApi: Api = {
       list: () => authFetch<Program[]>("/programs"),
       get: (id: string) => authFetch<Program>(`/programs/${id}`),
     },
+    sleep: {
+      list: () => authFetch<Sleep[]>("/sleep"),
+      create: (payload: { date: string; hours: number; note?: string }) =>
+        authFetch<Sleep>("/sleep", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }),
+      update: (id: string, payload: { date?: string; hours?: number; note?: string }) =>
+        authFetch<Sleep>(`/sleep/${id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        }),
+      remove: (id: string) =>
+        authFetch<void>(`/sleep/${id}`, { method: "DELETE" }),
+    },
   },
 
   // ---------- Coach ----------
@@ -112,9 +125,23 @@ export const realApi: Api = {
     trainees: {
       list: () => authFetch<User[]>("/coach/trainees"),
       get: (id: string) =>
-        authFetch<{ trainee: User; meals: Meal[]; workouts: Workout[]; programs: Program[] }>(
-          `/coach/trainees/${id}`
-        ),
+        authFetch<{
+          trainee: User;
+          profile: Profile | null;
+          meals: Meal[];
+          workouts: Workout[];
+          programs: Program[];
+          sleep: Sleep[];
+          goals: Goal[];
+        }>(`/coach/trainees/${id}`),
+
+      // 👇 חדש: הוספת מדידה למתאמן
+      addMeasurement: (traineeId: string, payload: any) =>
+        authFetch<Profile>(`/coach/trainees/${traineeId}/measurement`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }),
+
       programs: {
         list: (id: string) => authFetch<Program[]>(`/coach/trainees/${id}/programs`),
         create: (id: string, payload: any) =>
@@ -128,10 +155,52 @@ export const realApi: Api = {
             body: JSON.stringify(payload),
           }),
       },
+
+      goals: {
+        list: (traineeId: string) =>
+          authFetch<Goal[]>(`/coach/trainees/${traineeId}/goals`),
+
+        create: (traineeId: string, payload: { category: Goal["category"]; target: number; deadline: string }) =>
+          authFetch<Goal>(`/coach/trainees/${traineeId}/goals`, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
+
+        update: (traineeId: string, goalId: string, payload: { target: number; deadline: string }) =>
+          authFetch<Goal>(`/coach/trainees/${traineeId}/goals/${goalId}`, {
+            method: "PUT",
+            body: JSON.stringify(payload),
+          }),
+
+        remove: (traineeId: string, goalId: string) =>
+          authFetch<void>(`/coach/trainees/${traineeId}/goals/${goalId}`, {
+            method: "DELETE",
+          }),
+      },
     },
     programs: {
       list: () => authFetch<Program[]>("/coach/programs"),
       get: (id: string) => authFetch<Program>(`/coach/programs/${id}`),
     },
+  },
+
+  // ---------- Profile ----------
+  profile: {
+    get: () => authFetch<Profile>("/profile"),
+    update: (payload: { birthDate?: string; height?: number; bodyFat?: number }) =>
+      authFetch<Profile>("/profile", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+
+    addMeasurement: (payload) =>
+      authFetch<Profile>("/profile/measurement", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    removeMeasurement: (id) =>
+      authFetch<Profile>(`/profile/measurement/${id}`, {
+        method: "DELETE",
+      }),
   },
 };

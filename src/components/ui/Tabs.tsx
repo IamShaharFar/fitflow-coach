@@ -2,7 +2,7 @@ import React from "react";
 
 export function Tabs({ tabs, current, onChange }: { tabs: { key: string; label: string }[]; current: string; onChange: (k: string) => void }) {
   return (
-    <div className="flex gap-2 mb-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4 w-full">
       {tabs.map(t => (
         <button
           key={t.key}

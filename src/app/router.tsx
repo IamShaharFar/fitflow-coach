@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "@/state/authStore";
 import { AppLayout } from "@/components/AppLayout";
 import CoachProgramsPage from "@/features/coach/CoachProgramsPage";
+import ProfilePage from "@/features/trainee/ProfilePage";
 
 const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
 const TraineeDashboardPage = lazy(() => import("@/features/trainee/TraineeDashboardPage"));
@@ -11,6 +12,7 @@ const WorkoutsPage = lazy(() => import("@/features/trainee/WorkoutsPage"));
 const ProgramsPage = lazy(() => import("@/features/trainee/ProgramsPage"));
 const ProgramDetailsPage = lazy(() => import("@/features/trainee/ProgramDetailsPage"));
 const CoachProgramDetailsPage = React.lazy(() => import("@/features/coach/CoachProgramDetailsPage"));
+const SleepPage = lazy(() => import("@/features/trainee/SleepPage"));
 
 const CoachDashboardPage = lazy(() => import("@/features/coach/CoachDashboardPage"));
 const TraineesListPage = lazy(() => import("@/features/coach/TraineesListPage"));
@@ -47,6 +49,8 @@ export function AppRouter() {
           <Route path="workouts" element={<WorkoutsPage />} />
           <Route path="programs" element={<ProgramsPage />} />
           <Route path="programs/:programId" element={<ProgramDetailsPage />} />
+          <Route path="sleep" element={<SleepPage />} />
+          <Route path="/app/profile" element={<ProfilePage />} />
         </Route>
 
         <Route

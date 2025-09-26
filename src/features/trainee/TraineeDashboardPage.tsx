@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/services/api";
 import { Card, CardTitle, CardMeta } from "@/components/ui/Card";
-import { Utensils, Dumbbell, Activity, Plus, X } from "@/components/icons";
+import { Utensils, Dumbbell, Activity, Plus, X, Moon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 
 type MealForm = { text: string; mealType: string; mood: string; createdAt: string };
 type WorkoutForm = { type: string; createdAt: string };
+type SleepForm = { date: string; hours: number; note: string };
+
 
 export default function TraineeDashboardPage() {
   const nav = useNavigate();
@@ -25,6 +27,8 @@ export default function TraineeDashboardPage() {
   const [dialOpen, setDialOpen] = useState(false);
   const [mealOpen, setMealOpen] = useState(false);
   const [workoutOpen, setWorkoutOpen] = useState(false);
+  const [sleepOpen, setSleepOpen] = useState(false);
+
 
   // Meal create
   const mealForm = useForm<MealForm>({
@@ -78,6 +82,33 @@ export default function TraineeDashboardPage() {
       workoutForm.reset({
         type: "",
         createdAt: new Date().toISOString().slice(0, 16),
+      });
+    },
+  });
+
+  const sleepForm = useForm<SleepForm>({
+    defaultValues: {
+      date: new Date().toISOString().slice(0, 16), // datetime-local
+      hours: 8,
+      note: "",
+    },
+  });
+
+  const createSleep = useMutation({
+    mutationFn: (d: SleepForm) =>
+      api.trainee.sleep.create({
+        date: new Date(d.date).toISOString(),
+        hours: Number(d.hours),
+        note: d.note,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sleep"] });
+      show("השינה נוספה");
+      setSleepOpen(false);
+      sleepForm.reset({
+        date: new Date().toISOString().slice(0, 16),
+        hours: 8,
+        note: "",
       });
     },
   });
@@ -200,6 +231,15 @@ export default function TraineeDashboardPage() {
             >
               <Dumbbell /> אימון חדש
             </button>
+            <button
+              onClick={() => {
+                setDialOpen(false);
+                setSleepOpen(true);
+              }}
+              className="flex items-center gap-2 bg-purple-600 text-white rounded-full px-3 py-2 shadow-lg active:scale-95 transition"
+            >
+              <Moon/> שינה חדשה
+            </button>
           </div>
         )}
 
@@ -303,6 +343,52 @@ export default function TraineeDashboardPage() {
           </div>
         </form>
       </Modal>
+      <Modal open={sleepOpen} onClose={() => setSleepOpen(false)} title="הוספת שינה">
+        <form
+          className="space-y-3"
+          onSubmit={sleepForm.handleSubmit((d) => createSleep.mutate(d))}
+        >
+          <div>
+            <label className="block text-sm mb-1">תאריך ושעה</label>
+            <input
+              type="datetime-local"
+              className="w-full border rounded-xl px-3 py-2"
+              {...sleepForm.register("date", { required: true })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">שעות שינה</label>
+            <input
+              type="number"
+              min={0}
+              max={24}
+              step={0.1}
+              className="w-full border rounded-xl px-3 py-2"
+              {...sleepForm.register("hours", { required: true })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">הערה</label>
+            <input
+              className="w-full border rounded-xl px-3 py-2"
+              placeholder="לדוגמה: ישנתי טוב"
+              {...sleepForm.register("note")}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setSleepOpen(false)}>
+              ביטול
+            </Button>
+            <Button type="submit" disabled={createSleep.isPending}>
+              שמור
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 }

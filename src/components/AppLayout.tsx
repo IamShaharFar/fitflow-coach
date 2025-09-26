@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/state/authStore";
-import { Home, Utensils, Dumbbell, ClipboardList, Users, List, Menu, LogOut } from "@/components/icons";
+import { Home, Utensils, Dumbbell, ClipboardList, Users, List, Menu, LogOut, Moon, User } from "@/components/icons";
 
 export function AppLayout({ role }: { role: "coach" | "trainee" }) {
   const [open, setOpen] = useState(false);
@@ -122,6 +122,8 @@ function TraineeNav({ vertical = false }: { vertical?: boolean }) {
       <Item to="/app/meals"><Utensils size={18} /> ארוחות</Item>
       <Item to="/app/workouts"><Dumbbell size={18} /> אימונים</Item>
       <Item to="/app/programs"><ClipboardList size={18} /> תוכניות</Item>
+      <Item to="/app/sleep"><Moon size={18} /> שינה</Item> {/* 👈 הכפתור החדש */}
+      <Item to="/app/profile"><User size={18} /> פרופיל</Item>
     </div>
   );
 }

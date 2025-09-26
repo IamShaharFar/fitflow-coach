@@ -1,14 +1,15 @@
 import React from "react";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "destructive";
   size?: "sm" | "md" | "lg";
 };
 
 const classesBy = {
   primary: "bg-blue-600 text-white hover:bg-blue-700",
   secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
-  ghost: "bg-transparent hover:bg-gray-100"
+  ghost: "bg-transparent hover:bg-gray-100",
+  destructive: "bg-red-600 text-white hover:bg-red-700",
 };
 
 const sizeBy = {
